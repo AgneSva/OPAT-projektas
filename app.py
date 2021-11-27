@@ -44,7 +44,7 @@ def register():
         email = request.form['email']
 
         register_user_to_db(username, password,email)
-        return redirect(url_for('home.html'))
+        return redirect(url_for('login'))
 
     else:
         return render_template('register.html')
@@ -201,6 +201,9 @@ def ShowProfile():
    return render_template("profile.html", username=session['username'])
        # return render_template('profile.html', password= =session['password'] )
 
+
+
+
 def deleteAccount(conn, name):
        
     sql = ''' DELETE FROM users
@@ -220,6 +223,15 @@ def delete():
             
          session.clear()
          return redirect(url_for('index'))
+        
 
+
+@app.route('/list')
+def ShowList():
+   
+   return render_template("mylist.html", username=session['username'])
+       # return render_template('profile.html', password= =session['password'] )
+
+       
 if __name__ == '__main__':
     app.run(debug=True)
