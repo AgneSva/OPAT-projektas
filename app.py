@@ -51,7 +51,7 @@ def register():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-
+#CIA BANDYTAS SAUGOJIMAS
     if request.method == 'POST':
 
         api_key = "6b06dbe48b2f20ba8e9c3fadcfa903b3"
