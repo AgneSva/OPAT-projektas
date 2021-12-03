@@ -8,7 +8,14 @@ def __init__(self):
  f = open('db.sql','r')
  str = f.read()
  cur = con.cursor()
- cur.execute(str)
+ cur.executemany(str)
+
+def save_city_to_db(id, user, city):
+    con = sqlite3.connect('datab.db')
+    cur = con.cursor()
+    cur.execute('INSERT INTO user_item (Id, User, City) values (?,?,?)', (id, user, city))
+    con.commit()
+    con.close()
 
 
 def register_user_to_db(username,password,email):
@@ -32,6 +39,8 @@ def check_user(username, password):
 app = Flask(__name__)
 app.secret_key = "r@nd0mSk_1"
 
+temp = 0
+
 @app.route("/")
 def index():
     return render_template('home.html')
@@ -51,7 +60,7 @@ def register():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-#CIA BANDYTAS SAUGOJIMAS
+
     if request.method == 'POST':
 
         api_key = "6b06dbe48b2f20ba8e9c3fadcfa903b3"
@@ -63,6 +72,7 @@ def search():
         complete_url = base_url + "appid=" + api_key +"&q="+city_name + "&units=metric"
 
         response = requests.get(complete_url)
+        r = requests.get(complete_url.format(city_name)).json()
 
         x = response.json()
 
@@ -76,11 +86,13 @@ def search():
             z = x["weather"]
 
             weather_description = z[0]["description"]   
+
+            icon = r['weather'][0]['icon']
         
         else:
             return render_template('search.html', cityName = "Miestas nerastas", temperature = "", description = "")
 
-        return render_template('search.html', cityName = city_name, temperature = current_temperature, description = weather_description)
+        return render_template('search.html', cityName = city_name, temperature = current_temperature, description = weather_description,)
     else:
         return render_template('search.html')
 
@@ -99,6 +111,7 @@ def login():
     else:
         return render_template('login.html')
 
+
 @app.route('/home', methods=['POST', "GET"])
 def home():
 
@@ -106,40 +119,12 @@ def home():
 
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
-    city_name = "Vilnius"
+    #city_name = "Vilnius"
+    cities = ["Vilnius","Kaunas","New York","Bangkok","London","Dubai","Delhi","Rome","Mexico","Los Angeles"]
+    context1 = []
 
-    complete_url = base_url + "appid=" + api_key +"&q="+city_name + "&units=metric"
-
-    response = requests.get(complete_url)
-
-    x = response.json()
-
-    if x["cod"] != "404":
-        y = x["main"]
- 
-        current_temperature = y["temp"]
-    
-        current_humidity = y["humidity"]
-    
-        z = x["weather"]
-
-        weather_description = z[0]["description"]   
-    
-    else:
-        return render_template('search.html', cityName = "Miestas nerastas", temperature = "", description = "")
-
-    return render_template('home.html', cityName = city_name, temperature = current_temperature, description = weather_description)
-
-@app.route('/home-logged', methods=['POST', "GET"])
-def homeLoggedIn():
-    if request.method == 'POST':
-        api_key = "6b06dbe48b2f20ba8e9c3fadcfa903b3"
-
-        base_url = "http://api.openweathermap.org/data/2.5/weather?"
-
-        city_name = request.form['search']
-
-        complete_url = base_url + "appid=" + api_key +"&q="+city_name + "&units=metric"
+    for city in cities:
+        complete_url = base_url + "appid=" + api_key +"&q="+city + "&units=metric"
 
         response = requests.get(complete_url)
 
@@ -154,14 +139,72 @@ def homeLoggedIn():
         
             z = x["weather"]
 
-            weather_description = z[0]["description"]   
+            weather_description = z[0]["description"]
+            r = requests.get(complete_url.format(city)).json()
+
+            city_weather = [city, current_temperature, weather_description, r['weather'][0]['icon']]
+
+            context1.append(city_weather)
+    
+        else:
+            return render_template('search.html', popular=context1)
+
+    return render_template('home.html', popular=context1)
+
+#CIA BANDYTA SU SAUGOJIMU------------------------------------------------------------------------------------------------------------------------------------------------------
+searched = ""
+@app.route('/home-logged', methods=['POST', 'GET'])
+def homeLoggedIn():
+    if request.method == 'POST':
+        api_key = "6b06dbe48b2f20ba8e9c3fadcfa903b3"
+
+        base_url = "http://api.openweathermap.org/data/2.5/weather?"
+
+        city_name = request.form['search']
+        searched = city_name
+
+        complete_url = base_url + "appid=" + api_key +"&q="+city_name + "&units=metric"
+
+        response = requests.get(complete_url)
+        r = requests.get(complete_url.format(city_name)).json()
+
+        x = response.json()
+
+        if x["cod"] != "404" and x["cod"] != "400":
+            y = x['main']
+    
+            current_temperature = y['temp']
         
+            current_humidity = y['humidity']
+        
+            z = x['weather']
+
+            weather_description = z[0]['description']
+
+            icon =  r['weather'][0]['icon']
+
         else:
             return render_template('home-logged-in.html', cityName = "Miestas nerastas", temperature = "", description = "")
-        return render_template('home-logged-in.html', cityName = city_name, temperature = current_temperature, description = weather_description)
+        return render_template('home-logged-in.html', cityName = city_name, temperature = current_temperature, description = weather_description, icon = icon, searching=city_name)
     else:
-        return render_template('home-logged-in.html')
+        return render_template('home-logged-in.html')   
 
+@app.route('/save', methods=['POST', 'GET'])
+def homeSave():
+    if request.method == 'POST':
+        id = 1
+        email = session['username']
+        city = request.form['search']
+        print(city)   
+
+        save_city_to_db(id, email, city)
+        
+        #return redirect(url_for('homeLoggedIn'))       
+        return render_template('home-logged-in.html')   
+
+    else:
+        return render_template('home-logged-in.html')   
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @app.route('/logout')
 def logout():
     session.clear()
