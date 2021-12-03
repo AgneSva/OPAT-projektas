@@ -28,22 +28,27 @@
 
     <br/>
     <br/>
-    <form action=/home-logged method='POST'>
+    <form action=/home-logged method='post'>
         <div class="mb-3">
             <label for="Search" class="form-label">Search</label>
-            <input type="text" class="form-control" id="search" name="search">
+            <input type="text" class="form-control" id="search" name="search" value={{searching}}>
             <button type="submit" class="btn btn-primary">Search</button>
         </div>        
+    
     
         <br/>
         <h2>Search result: </h2>
         <div class = "weather">
-            <h5>City: {{cityName}}</h5>
-            <h5>Temperature: {{temperature}} C</h5>
-            <h5>Description: {{description}}</h5>
-            <a href="/home-logged" class="btn btn-primary btn-sm">Save</a>
+            <img src="http://openweathermap.org/img/w/{{ icon }}.png" alt="Image">
+            <h5 name="city_name">City: {{cityName}}</h5>
+            <h5>Temperature: {{temperature}}</h5>
+            <h5>Description: {{description}}</h5>         
         </div>
-    </form>   
+    </form>
+    <form action="/save" method="POST">
+        <br/>
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+     </form>
 </div>
 </body>
 </html>
