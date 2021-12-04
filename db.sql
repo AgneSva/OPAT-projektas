@@ -6,5 +6,5 @@ CREATE TABLE users (
 
 CREATE Table user_items(
     username Text not null,
-    city Text not null
+    citys Text not null
 )
