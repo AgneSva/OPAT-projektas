@@ -10,10 +10,10 @@ def __init__(self):
  cur = con.cursor()
  cur.executemany(str)
 
-def save_city_to_db(id, user, city):
+def save_city_to_db( user, city):
     con = sqlite3.connect('datab.db')
     cur = con.cursor()
-    cur.execute('INSERT INTO user_item (Id, User, City) values (?,?,?)', (id, user, city))
+    cur.execute('INSERT INTO user_items ( username, citys) values (?,?)', ( user, city))
     con.commit()
     con.close()
 
@@ -161,7 +161,9 @@ def homeLoggedIn():
         base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
         city_name = request.form['search']
-        searched = city_name
+        global searched 
+        searched= city_name
+        print(searched)
 
         complete_url = base_url + "appid=" + api_key +"&q="+city_name + "&units=metric"
 
@@ -189,15 +191,18 @@ def homeLoggedIn():
     else:
         return render_template('home-logged-in.html')   
 
+    
+
+
 @app.route('/save', methods=['POST', 'GET'])
 def homeSave():
     if request.method == 'POST':
-        id = 1
+       
         email = session['username']
-        city = request.form['search']
-        print(city)   
+        city = searched
+           
 
-        save_city_to_db(id, email, city)
+        save_city_to_db( email, city)
         
         #return redirect(url_for('homeLoggedIn'))       
         return render_template('home-logged-in.html')   
@@ -205,6 +210,9 @@ def homeSave():
     else:
         return render_template('home-logged-in.html')   
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -267,14 +275,30 @@ def delete():
          session.clear()
          return redirect(url_for('index'))
         
+def findlist(usr):
+    con = sqlite3.connect('datab.db')
+    cur = con.cursor()
+    cur.execute('Select citys FROM user_items WHERE username=?', [usr])
+
+    items = cur.fetchall()
+    print(items)
+    return items
 
 
-@app.route('/list')
+
+
+
+@app.route('/list', methods=['POST', 'GET'])
 def ShowList():
-   
-   return render_template("mylist.html", username=session['username'])
+   usr=session['username']
+
+   items=findlist(usr)
+  
+
+   return render_template("mylist.html", username=session['username'], items=items)
        # return render_template('profile.html', password= =session['password'] )
 
        
 if __name__ == '__main__':
     app.run(debug=True)
+
