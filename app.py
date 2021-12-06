@@ -3,6 +3,7 @@ from flask import Flask, redirect, url_for, render_template, request, session
 import requests
 
 
+
 def __init__(self):
  con = sqlite3.connect('datab.db')
  f = open('db.sql','r')
@@ -163,8 +164,7 @@ def homeLoggedIn():
         city_name = request.form['search']
         global searched 
         searched= city_name
-        print(searched)
-
+       
         complete_url = base_url + "appid=" + api_key +"&q="+city_name + "&units=metric"
 
         response = requests.get(complete_url)
@@ -274,14 +274,16 @@ def delete():
             
          session.clear()
          return redirect(url_for('index'))
-        
+
+
+
 def findlist(usr):
     con = sqlite3.connect('datab.db')
     cur = con.cursor()
     cur.execute('Select citys FROM user_items WHERE username=?', [usr])
 
     items = cur.fetchall()
-    print(items)
+  
     return items
 
 
@@ -297,8 +299,16 @@ def ShowList():
 
    return render_template("mylist.html", username=session['username'], items=items)
        # return render_template('profile.html', password= =session['password'] )
-
        
+
+@app.route('/remove', methods=['GET', 'POST'])
+def remove():
+
+    if request.method == 'POST':
+       
+        return render_template("profile.html", username=session['username'])
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
