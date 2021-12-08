@@ -25,11 +25,15 @@
     </form>
     <h1> Most Popular cities</h1>
     <br/>
-    <div class = "weather">
-        <h5>City: {{cityName}}</h5>
-        <h5>Temperature: {{temperature}} C</h5>
-        <h5>Description: {{description}}</h5>
-    </div>
+    {% for city in popular%}
+        <div class = "weather" style="border: 1px;">
+            <img src="http://openweathermap.org/img/w/{{ city[3] }}.png" alt="Image">
+            <h5>City: {{city[0]}}</h5>
+            <h5>Temperature: {{city[1]}} C</h5>
+            <h5>Description: {{city[2]}}</h5>
+            <br/>
+        </div>
+    {% endfor %}
 
     
 </div>
