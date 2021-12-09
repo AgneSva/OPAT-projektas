@@ -108,9 +108,11 @@ def login():
         if check_user(username, password):
             session['username'] = username
             session['password'] = password
-        return redirect(url_for('homeLoggedIn'))
+            return redirect(url_for('homeLoggedIn'))
+        else:
+            return render_template('login.html', error="Atleiskite, bet prisijungimo duomenys, neteisingi")    
     else:
-        return render_template('login.html')
+        return render_template('login.html', error="")
 
 
 @app.route('/home', methods=['POST', "GET"])
